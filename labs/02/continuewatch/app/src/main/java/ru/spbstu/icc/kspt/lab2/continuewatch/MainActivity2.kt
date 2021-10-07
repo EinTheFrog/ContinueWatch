@@ -1,11 +1,11 @@
 package ru.spbstu.icc.kspt.lab2.continuewatch
 
+import android.content.Context
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity2: AppCompatActivity() {
     var secondsElapsed: Int = 0
     var secondsElapsedBeforeStop = 0
     lateinit var textSecondsElapsed: TextView
@@ -27,15 +27,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        textSecondsElapsed = findViewById(R.id.textSecondsElapsed)
-        backgroundThread.start()
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        with(savedInstanceState) { secondsElapsedBeforeStop = getInt(STATE_SECONDS) }
+        val sharedPref = this.getSharedPreferences(
+            getString(R.string.preference_file_key),
+            Context.MODE_PRIVATE
+        )
+        secondsElapsedBeforeStop = sharedPref.getInt(STATE_SECONDS, secondsElapsedBeforeStop)
         secondsElapsed = secondsElapsedBeforeStop
+
+        textSecondsElapsed = findViewById(R.id.textSecondsElapsed)
         textSecondsElapsed.text = getString(R.string.textSeconds, secondsElapsed)
-        super.onRestoreInstanceState(savedInstanceState)
+        backgroundThread.start()
     }
 
     override fun onStart() {
@@ -44,11 +45,21 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
+    override fun onStop() {
         secondsElapsedBeforeStop = secondsElapsed
-        outState.run {
-            putInt(STATE_SECONDS, secondsElapsedBeforeStop)
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        val sharedPref = this.getSharedPreferences(
+            getString(R.string.preference_file_key),
+            Context.MODE_PRIVATE
+        )
+        with (sharedPref.edit()) {
+            putInt(STATE_SECONDS, secondsElapsed)
+            apply()
         }
-        super.onSaveInstanceState(outState)
+
+        super.onDestroy()
     }
 }
