@@ -47,19 +47,15 @@ class MainActivity2: AppCompatActivity() {
 
     override fun onStop() {
         secondsElapsedBeforeStop = secondsElapsed
-        super.onStop()
-    }
 
-    override fun onDestroy() {
         val sharedPref = this.getSharedPreferences(
             getString(R.string.preference_file_key),
             Context.MODE_PRIVATE
         )
         with (sharedPref.edit()) {
-            putInt(STATE_SECONDS, secondsElapsed)
+            putInt(STATE_SECONDS, secondsElapsedBeforeStop)
             apply()
         }
-
-        super.onDestroy()
+        super.onStop()
     }
 }
